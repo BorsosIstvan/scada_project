@@ -55,16 +55,10 @@ Je kan objecten op het scherm plaatsen, realtime communiceren met een PLC (zoals
 ### 💡 Toekomstige uitbreidingen
 
 - ✅ Objecten kunnen gewisseld worden
-
 - ✅ Com-poort keuze via menu
-
 - ✅ IP (Modbus TCP) ondersteuning
-
 - ✅ Nieuwe objecttypes: lamp, meter, button
-
 - ✅ Logische condities toevoegen (als temp > 60 → alarm)
-
-- ✅ Projecten opslaan en laden
 
 ---
 
