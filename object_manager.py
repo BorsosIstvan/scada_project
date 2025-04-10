@@ -1,6 +1,5 @@
 import time
 import threading
-from PIL import Image, ImageTk
 import os
 import serial.tools.list_ports
 import tkinter as tk
