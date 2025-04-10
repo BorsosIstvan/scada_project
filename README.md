@@ -31,3 +31,44 @@ Je kan objecten op het scherm plaatsen, realtime communiceren met een PLC (zoals
 1. Clone de repo:
    ```bash
    git clone https://github.com/BorsosIstvan/scada_project.git
+2. Clone de repo:
+   ```bash
+   pip install -r requirements.txt
+3. Start de app:
+   ```bash
+   python main.py
+
+---
+
+### 🧪 Gebruikte technologieën
+
+🐍 Python 3
+
+📦 PyModbus
+
+🎨 Tkinter
+
+🧱 PyInstaller (voor .exe bundel)
+
+---
+
+### 💡 Toekomstige uitbreidingen
+
+- ✅ Objecten kunnen gewisseld worden
+
+- ✅ Com-poort keuze via menu
+
+- ✅ IP (Modbus TCP) ondersteuning
+
+- ✅ Nieuwe objecttypes: lamp, meter, button
+
+- ✅ Logische condities toevoegen (als temp > 60 → alarm)
+
+- ✅ Projecten opslaan en laden
+
+---
+
+### 👨‍🔧 Gemaakt door
+István – elektricien, maker, en liefhebber van slimme systemen
+🇭🇺 Hongaars, 🇷🇴 Roemeens, werkt in 🇳🇱 Nederland
+
