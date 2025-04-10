@@ -8,8 +8,10 @@ from modbus_simulator import ModbusSimulator
 
 
 class ScadaObject:
-    def __init__(self, canvas, x, y, width=80, height=50, color="lightblue", text="Object", image_path="None",
+    def __init__(self, canvas, x, y, width=80, height=50, color="lightblue", text="Object",
+                 image_path_state_0=None, image_path_state_1=None,
                  register_type="HR", register_address=0, value=0, value_visible=False):
+
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -17,34 +19,44 @@ class ScadaObject:
         self.height = height
         self.color = color
         self.text = text
-        self.image_path = image_path
+
+        self.image_path_state_0 = image_path_state_0
+        self.image_path_state_1 = image_path_state_1
+
+        self.tk_image_state_0 = None
+        self.tk_image_state_1 = None
+
+        self.image_item_id = None  # komt voor canvas image
+
+        self.register_type = register_type
+        self.register_address = register_address
+        self.value = value
+        self.value_visible = value_visible
 
         self.needs_write = False
 
-        self.image = None
-        self.tk_image = None
-        self.image_id = None
+        # Als er een afbeelding is (één van beide staten), geen rechthoek tekenen
+        has_image = (self.image_path_state_0 and self.image_path_state_0.lower() != "none") or \
+                    (self.image_path_state_1 and self.image_path_state_1.lower() != "none")
 
-        # Nieuwe eigenschappen voor registers
-        self.register_type = register_type  # 'Co', 'DI', 'IR', 'HR'
-        self.register_address = register_address
-        self.value = value  # Waarde kan een boolean of 16-bit integer zijn
-        self.value_visible = value_visible  # De waarde is standaard niet zichtbaar
+        fill_color = "" if has_image else self.color
+        outline_color = "" if has_image else "black"
 
-        # Gebruik tijdelijke fill afhankelijk van of er een afbeelding is
-        fill_color = "" if self.image_path.lower() != "none" else self.color
-        outline_color = "" if self.image_path.lower() != "none" else "black"
         self.rect = canvas.create_rectangle(x, y, x + width, y + height, fill=fill_color, outline=outline_color)
         self.label = canvas.create_text(x + width / 2, y + height / 2, text=text)
         self.value_label = canvas.create_text(x + width / 2, y + height + 20, text=value)
 
-        if self.image_path and self.image_path.lower() != "none":
-            self.load_image()
+        self.load_images()  # laad beide beelden
+        # Toon het juiste beeld, op basis van de waarde
+        if has_image:
+            image_to_use = self.tk_image_state_1 if self.value else self.tk_image_state_0
+            if image_to_use:
+                self.image_item_id = canvas.create_image(x, y, anchor="nw", image=image_to_use)
 
         self.bind_events()
 
     def bind_events(self):
-        for item in [self.rect, self.label, self.image_id]:
+        for item in [self.rect, self.label, self.image_item_id]:
             if item:
                 self.canvas.tag_bind(item, "<Button-1>", self.on_click)
                 self.canvas.tag_bind(item, "<B1-Motion>", self.on_drag)
@@ -52,16 +64,34 @@ class ScadaObject:
                 self.canvas.tag_bind(item, "<Double-Button-1>", self.on_double_click)
                 self.canvas.tag_bind(item, "<Button-3>", self.on_right_click)
 
-    def load_image(self):
+    def load_images(self):
         try:
-            if os.path.exists(self.image_path):
-                self.image = Image.open(self.image_path)
-                self.image = self.image.resize((self.width, self.height))
-                self.tk_image = ImageTk.PhotoImage(self.image)
-                if self.image_id:
-                    self.canvas.delete(self.image_id)
-                self.image_id = self.canvas.create_image(self.x, self.y, anchor="nw", image=self.tk_image)
-                self.bind_events()
+            self.tk_image_state_0 = None
+            self.tk_image_state_1 = None
+
+            # Laad afbeelding voor state 0
+            if self.image_path_state_0 and os.path.exists(self.image_path_state_0):
+                image0 = Image.open(self.image_path_state_0).resize((self.width, self.height))
+                self.tk_image_state_0 = ImageTk.PhotoImage(image0)
+
+            # Laad afbeelding voor state 1
+            if self.image_path_state_1 and os.path.exists(self.image_path_state_1):
+                image1 = Image.open(self.image_path_state_1).resize((self.width, self.height))
+                self.tk_image_state_1 = ImageTk.PhotoImage(image1)
+
+            # Verwijder vorige image van canvas als die er is
+            if self.image_item_id:
+                self.canvas.delete(self.image_item_id)
+
+            # Plaats de juiste afbeelding op canvas op basis van waarde
+            image_to_use = self.tk_image_state_0
+            if self.register_type =="Co" or self.register_type =="DI":
+                image_to_use = self.tk_image_state_1 if self.value else self.tk_image_state_0
+            if image_to_use:
+                self.image_item_id = self.canvas.create_image(self.x, self.y, anchor="nw", image=image_to_use)
+
+            self.bind_events()
+
         except Exception as e:
             print(f"Fout bij laden afbeelding: {e}")
 
@@ -84,8 +114,8 @@ class ScadaObject:
         self.canvas.move(self.rect, dx, dy)
         self.canvas.move(self.label, dx, dy)
         self.canvas.move(self.value_label, dx, dy)
-        if self.image_id:
-            self.canvas.move(self.image_id, dx, dy)
+        if self.image_item_id:
+            self.canvas.move(self.image_item_id, dx, dy)
         self.x = new_x
         self.y = new_y
 
@@ -100,7 +130,8 @@ class ScadaObject:
             "height": self.height,
             "color": self.color,
             "text": self.text,
-            "image_path": self.image_path,
+            "image_path_state0": self.image_path_state_0,
+            "image_path_state1": self.image_path_state_1,
             "register_type": self.register_type,
             "register_address": self.register_address,
             "value": self.value,
@@ -121,20 +152,29 @@ class ScadaObject:
             "y": str(self.y),
             "width": str(self.width),
             "height": str(self.height),
-            "image_path": str(self.image_path),
+            "image_path_state_0": str(self.image_path_state_0),
+            "image_path_state_1": str(self.image_path_state_1),
             "register_type": self.register_type,
             "register_address": int(self.register_address),
             "value": int(self.value),
             "value_visible": str(self.value_visible)
         }
 
-        def browse_image():
+        def browse_image_state0():
             filepath = filedialog.askopenfilename(
                 filetypes=[("Afbeeldingen", "*.png *.jpg *.jpeg *.gif *.bmp"), ("Alle bestanden", "*.*")]
             )
             if filepath:
-                entries["image_path"].delete(0, 'end')
-                entries["image_path"].insert(0, filepath)
+                entries["image_path_state_0"].delete(0, 'end')
+                entries["image_path_state_0"].insert(0, filepath)
+
+        def browse_image_state1():
+            filepath = filedialog.askopenfilename(
+                filetypes=[("Afbeeldingen", "*.png *.jpg *.jpeg *.gif *.bmp"), ("Alle bestanden", "*.*")]
+            )
+            if filepath:
+                entries["image_path_state_1"].delete(0, 'end')
+                entries["image_path_state_1"].insert(0, filepath)
 
         row = 0
         for key, value in fields.items():
@@ -143,8 +183,10 @@ class ScadaObject:
             entry.insert(0, value)
             entry.grid(row=row, column=1, padx=10, pady=5)
             entries[key] = entry
-            if key == "image_path":
-                Button(dialog, text="Bladeren...", command=browse_image).grid(row=row, column=2, padx=5)
+            if key == "image_path_state_0":
+                Button(dialog, text="Bladeren...", command=browse_image_state0).grid(row=row, column=2, padx=5)
+            elif key == "image_path_state_1":
+                Button(dialog, text="Bladeren...", command=browse_image_state1).grid(row=row, column=2, padx=5)
             row += 1
 
         def apply_changes():
@@ -155,7 +197,8 @@ class ScadaObject:
                 self.y = int(entries["y"].get())
                 self.width = int(entries["width"].get())
                 self.height = int(entries["height"].get())
-                self.image_path = entries["image_path"].get()
+                self.image_path_state_0 = entries["image_path_state_0"].get()
+                self.image_path_state_1 = entries["image_path_state_1"].get()
                 self.register_type = entries["register_type"].get()  # Update register type
                 self.register_address = entries["register_address"].get()
                 self.value = entries["value"].get()  # Update value
@@ -173,21 +216,33 @@ class ScadaObject:
         Button(dialog, text="Toepassen", command=apply_changes).grid(row=row, columnspan=2, pady=10)
 
     def update_visual(self):
+        # Bijwerken van de coordinaten van het object:
         self.canvas.coords(self.rect, self.x, self.y, self.x + self.width, self.y + self.height)
         self.canvas.coords(self.label, self.x + self.width / 2, self.y + self.height / 2)
         self.canvas.itemconfig(self.label, text=self.text)
         self.canvas.coords(self.value_label, self.x + self.width / 2, self.y + self.height + 20)
         self.canvas.itemconfig(self.value_label, text=self.value)
 
-        if self.image_path and self.image_path.lower() != "none":
+        # Beeldafbeelding aanpassen op basis van de waarde (state0 / state1)
+        if self.value == 0 and self.image_path_state_0 and self.image_path_state_0.lower() != "none":
             self.canvas.itemconfig(self.rect, fill="", outline="")
-            self.load_image()
+            self.image_path = self.image_path_state_0  # Laad de afbeelding voor state0
+            self.load_images()
+        elif self.value == 1 and self.image_path_state_1 and self.image_path_state_1.lower() != "none":
+            self.canvas.itemconfig(self.rect, fill="", outline="")
+            self.image_path = self.image_path_state_1  # Laad de afbeelding voor state1
+            self.load_images()
+        elif self.register_type =="HR" or self.register_type =="IR":
+            self.canvas.itemconfig(self.rect, fill="", outline="")
+            self.image_path = self.image_path_state_0  # Laad de afbeelding voor state0
+            self.load_images()
         else:
-            self.canvas.itemconfig(self.rect, fill=self.color, outline="black")
+            self.canvas.itemconfig(self.rect, fill=self.color,
+                                   outline="black")  # Geen afbeelding, gewoon de kleur gebruiken
 
         # Correcte volgorde van lagen:
-        if self.image_id:
-            self.canvas.tag_lower(self.image_id)
+        if self.image_item_id:
+            self.canvas.tag_lower(self.image_item_id)
         self.canvas.tag_raise(self.rect)
         self.canvas.tag_raise(self.label)
         self.canvas.tag_raise(self.value_label)
