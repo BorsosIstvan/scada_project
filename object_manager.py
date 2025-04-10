@@ -50,6 +50,7 @@ class ScadaObject:
                 self.canvas.tag_bind(item, "<B1-Motion>", self.on_drag)
                 self.canvas.tag_bind(item, "<ButtonRelease-1>", self.on_release)
                 self.canvas.tag_bind(item, "<Double-Button-1>", self.on_double_click)
+                self.canvas.tag_bind(item, "<Button-3>", self.on_right_click)
 
     def load_image(self):
         try:
@@ -67,6 +68,10 @@ class ScadaObject:
     def on_click(self, event):
         self.offset_x = event.x - self.x
         self.offset_y = event.y - self.y
+        self.click_dialog()
+
+    def on_right_click(self, event):
+        self.right_click_dialog()
 
     def on_double_click(self, event):
         self.show_properties_dialog()
@@ -204,6 +209,15 @@ class ScadaObject:
 
     def get_value(self):
         return self.value
+
+    def click_dialog(self):
+        print("Wat wil je doen met dit object?", self.text)
+        if self.register_type == "Co":
+            self.value = not self.value
+            self.needs_write = True
+
+    def right_click_dialog(self):
+        print("Wil je het wisselen?", self.text)
 
 
 class ObjectManager:

@@ -1,8 +1,8 @@
+# SCADA app main.py
 import tkinter as tk
-
-import menu_manager
 from object_manager import ObjectManager
 from menu_manager import MenuManager
+
 
 class SCADAApp:
     def __init__(self, root):
@@ -19,6 +19,7 @@ class SCADAApp:
             self.root.title(f"SCADA Editor - {name}")
 
         self.menu = MenuManager.create_menu(root, self.canvas, self.object_manager, update_title)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
