@@ -31,7 +31,7 @@ Je kan objecten op het scherm plaatsen, realtime communiceren met een PLC (zoals
 1. Clone de repo:
    ```bash
    git clone https://github.com/BorsosIstvan/scada_project.git
-2. Clone de repo:
+2. Installeer de vereisten:
    ```bash
    pip install -r requirements.txt
 3. Start de app:
