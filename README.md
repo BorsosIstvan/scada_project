@@ -40,6 +40,21 @@ Je kan objecten op het scherm plaatsen, realtime communiceren met een PLC (zoals
 
 ---
 
+### ⚙️ Het maken van de main.exe (Windows)
+
+1. Zorg ervoor dat je PyInstaller hebt geïnstalleerd:
+   ```bash
+   pip install pyinstaller
+2. Maak de .exe door het onderstaande commando uit te voeren in de hoofdmap van het project (waar main.py zich bevindt):
+   ```bash
+   pyinstaller --onefile --windowed main.py
+3. Na het uitvoeren van dit commando wordt er een map genaamd dist gemaakt in je projectmap. Binnen de dist-map zul je de main.exe vinden.
+   ```bash
+   nain.exe
+4. Je kunt de main.exe nu uitvoeren als een standalone applicatie zonder dat Python geïnstalleerd hoeft te zijn.
+
+---
+
 ### 🧪 Gebruikte technologieën
 
 🐍 Python 3
