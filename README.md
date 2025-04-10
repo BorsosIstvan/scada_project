@@ -50,7 +50,7 @@ Je kan objecten op het scherm plaatsen, realtime communiceren met een PLC (zoals
    pyinstaller --onefile --windowed main.py
 3. Na het uitvoeren van dit commando wordt er een map genaamd dist gemaakt in je projectmap. Binnen de dist-map zul je de main.exe vinden.
    ```bash
-   nain.exe
+   dist\main.exe
 4. Je kunt de main.exe nu uitvoeren als een standalone applicatie zonder dat Python geïnstalleerd hoeft te zijn.
 
 ---
