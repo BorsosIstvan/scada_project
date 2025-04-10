@@ -1,12 +1,15 @@
 import time
 import threading
+from PIL import Image, ImageTk
 import os
 import serial.tools.list_ports
 import tkinter as tk
 from modbus_simulator import ModbusSimulator
 
+
 class ScadaObject:
-    def __init__(self, canvas, x, y, width=80, height=50, color="lightblue", text="Object", image_path="None", register_type="HR", register_address=0, value=0, value_visible=False):
+    def __init__(self, canvas, x, y, width=80, height=50, color="lightblue", text="Object", image_path="None",
+                 register_type="HR", register_address=0, value=0, value_visible=False):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -202,6 +205,7 @@ class ScadaObject:
     def get_value(self):
         return self.value
 
+
 class ObjectManager:
     def __init__(self, canvas):
         self.canvas = canvas
@@ -310,7 +314,6 @@ class ObjectManager:
                 except Exception as e:
                     print("Fout bij update object:", e)
 
-
             time.sleep(1)
 
     def write_registers(self, obj):
@@ -333,10 +336,10 @@ class ObjectManager:
         except Exception as e:
             print("Fout bij schrijven naar PLC:", e)
 
-
     def open_communication_settings(self):
         print("Communicatie-instellingen openen - nog niet geïmplementeerd")
-# Dit dialoogvenster stelt de gebruiker in staat om COM-poort en baudrate te kiezen
+
+        # Dit dialoogvenster stelt de gebruiker in staat om COM-poort en baudrate te kiezen
         def get_available_ports():
             ports = list(serial.tools.list_ports.comports())
             return [port.device for port in ports]
