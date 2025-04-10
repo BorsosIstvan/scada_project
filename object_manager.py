@@ -27,6 +27,7 @@ class ScadaObject:
         self.tk_image_state_1 = None
 
         self.image_item_id = None  # komt voor canvas image
+        self.image_id = None
 
         self.register_type = register_type
         self.register_address = register_address
@@ -84,9 +85,7 @@ class ScadaObject:
                 self.canvas.delete(self.image_item_id)
 
             # Plaats de juiste afbeelding op canvas op basis van waarde
-            image_to_use = self.tk_image_state_0
-            if self.register_type =="Co" or self.register_type =="DI":
-                image_to_use = self.tk_image_state_1 if self.value else self.tk_image_state_0
+            image_to_use = self.tk_image_state_1 if self.value else self.tk_image_state_0
             if image_to_use:
                 self.image_item_id = self.canvas.create_image(self.x, self.y, anchor="nw", image=image_to_use)
 
@@ -130,8 +129,8 @@ class ScadaObject:
             "height": self.height,
             "color": self.color,
             "text": self.text,
-            "image_path_state0": self.image_path_state_0,
-            "image_path_state1": self.image_path_state_1,
+            "image_path_state_0": self.image_path_state_0,
+            "image_path_state_1": self.image_path_state_1,
             "register_type": self.register_type,
             "register_address": self.register_address,
             "value": self.value,
@@ -300,7 +299,7 @@ class ObjectManager:
             self.canvas.delete(obj.rect)
             self.canvas.delete(obj.label)
             self.canvas.delete(obj.value_label)
-            self.canvas.delete(obj.image_id)
+            self.canvas.delete(obj.image_item_id)
         self.objects = []
 
     def serialize_objects(self):
@@ -317,7 +316,8 @@ class ObjectManager:
                 data.get("height", 50),
                 data.get("color", "lightblue"),
                 data.get("text", "Object"),
-                data.get("image_path", "None"),
+                data.get("image_path_state_0", "None"),
+                data.get("image_path_state_1", "None"),
                 data.get("register_type", "HR"),
                 data.get("register_address", 0),
                 data.get("value", "100"),
