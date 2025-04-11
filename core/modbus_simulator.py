@@ -1,16 +1,25 @@
 from pymodbus.client.serial import ModbusSerialClient
+from config import MODBUS_CONFIG
+
 
 class ModbusSimulator:
-    def __init__(self, port='COM4'):
+    def __init__(self, port=None, baudrate=None):
+        # Gebruik de waarden uit de config of fallback naar default
+        self.port = port or MODBUS_CONFIG["com_port"]
+        self.baudrate = baudrate or MODBUS_CONFIG["baud_rate"]
+        self.stopbits = MODBUS_CONFIG["stopbits"]
+        self.bytesize = MODBUS_CONFIG["bytesize"]
+        self.parity = MODBUS_CONFIG["parity"]
+        self.timeout = MODBUS_CONFIG["timeout"]
+        # Initialiseer de client met de configuratie
         self.client = ModbusSerialClient(
-            port=port,
-            baudrate=9600,
-            stopbits=1,
-            bytesize=8,
-            parity='N',
-            timeout=1
+            port=self.port,
+            baudrate=self.baudrate,
+            stopbits=self.stopbits,
+            bytesize=self.bytesize,
+            parity=self.parity,
+            timeout=self.timeout
         )
-        self.client.connect()
 
     def lees_register(self, register_type, register_address):
         if register_type == 'holding_register':
@@ -22,6 +31,9 @@ class ModbusSimulator:
             if not result.isError():
                 return result.bits[0]
         return None
+
+    def connect(self):
+        self.client.connect()
 
     def sluit(self):
         self.client.close()

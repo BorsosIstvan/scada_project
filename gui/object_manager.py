@@ -278,13 +278,15 @@ from config import COM_PORT, BAUD_RATE, COILS, DISCRETE_INPUTS, HOLDING_REGISTER
 
 
 class ObjectManager:
-    def __init__(self, canvas):
+    def __init__(self, canvas, update_title_callback):
         self.canvas = canvas
         self.objects = []
+        self.update_title_callback = update_title_callback
         # definieer de communicatie
         self.com_port = COM_PORT
         self.baud_rate = BAUD_RATE
-        self.modbus = ModbusSimulator(self.com_port)  # Zorg ervoor dat je de juiste poort kiest
+        self.modbus = ModbusSimulator(self.com_port, self.baud_rate)  # Zorg ervoor dat je de juiste poort kiest
+        # self.modbus.connect()
         self.running = False
         self.thread = False
         self.modbus_enable = False
@@ -332,16 +334,21 @@ class ObjectManager:
     def start_simulatie(self):
         """Start de simulatie in een aparte thread"""
         if not self.running:
+            if self.modbus_enable:
+                self.modbus.connect()
             self.running = True
             self.thread = threading.Thread(target=self._simulation_loop, daemon=True)
             self.thread.start()
             print("Simulatie gestart.")
+            self.update_title_callback()
 
     def stop_simulatie(self):
         """Stop de simulatie"""
         if self.running:
             self.running = False
+            self.modbus.sluit()
             print("Simulatie gestopt")
+            self.update_title_callback()
 
     def _simulation_loop(self):
         while self.running:
@@ -410,26 +417,35 @@ class ObjectManager:
             print("Fout bij schrijven naar PLC:", e)
 
     def open_communication_settings(self):
-        print("Communicatie-instellingen openen - nog niet geïmplementeerd")
+        print("Communicatie-instellingen openen")
 
-        # Dit dialoogvenster stelt de gebruiker in staat om COM-poort en baudrate te kiezen
+        # Verkrijg beschikbare poorten
         def get_available_ports():
             ports = list(serial.tools.list_ports.comports())
             return [port.device for port in ports]
 
+        # Instellingen opslaan
         def save_settings():
             self.com_port = com_port_var.get()
             self.baud_rate = baud_rate_var.get()
-            print(f"COM-poort ingesteld op {self.com_port}, Baudrate ingesteld op {self.baud_rate}")
+            self.modbus_enable = modbus_enable_var.get()  # Sla de checkbox-status op
+            self.modbus.sluit()
+            self.modbus = ModbusSimulator(self.com_port, self.baud_rate)
+            print(
+                f"COM-poort ingesteld op {self.com_port}, Baudrate ingesteld op {self.baud_rate}, Modbus inschakelen: {self.modbus_enable}")
             communicatie_dialog.destroy()
 
         communicatie_dialog = tk.Toplevel()
         communicatie_dialog.title("Communicatie-instellingen")
 
+        # Frame voor een nettere indeling
+        frame = tk.Frame(communicatie_dialog)
+        frame.pack(padx=10, pady=10)
+
         # Label en dropdown voor COM-poort kiezen
         available_ports = get_available_ports()
-        com_port_label = tk.Label(communicatie_dialog, text="Kies COM-poort:")
-        com_port_label.pack(padx=10, pady=5, anchor="w")
+        com_port_label = tk.Label(frame, text="Kies COM-poort:")
+        com_port_label.grid(row=0, column=0, sticky="w", pady=5)
 
         com_port_var = tk.StringVar(communicatie_dialog)
 
@@ -441,23 +457,29 @@ class ObjectManager:
         else:
             com_port_var.set("")  # Geen poorten beschikbaar
 
-        com_port_dropdown = tk.OptionMenu(communicatie_dialog, com_port_var, *available_ports)
-        com_port_dropdown.pack(padx=10, pady=5)
+        com_port_dropdown = tk.OptionMenu(frame, com_port_var, *available_ports)
+        com_port_dropdown.grid(row=0, column=1, pady=5)
 
         # Label en dropdown voor baudrate kiezen
-        baud_rate_label = tk.Label(communicatie_dialog, text="Kies Baudrate:")
-        baud_rate_label.pack(padx=10, pady=5, anchor="w")
+        baud_rate_label = tk.Label(frame, text="Kies Baudrate:")
+        baud_rate_label.grid(row=1, column=0, sticky="w", pady=5)
 
         baud_rate_var = tk.IntVar(communicatie_dialog)
+        baud_rate_var.set(self.baud_rate)  # Zet standaard baudrate
 
-        # Zet de huidige baudrate als de standaardwaarde
-        baud_rate_var.set(self.baud_rate)  # Standaard waarde is 9600
+        baud_rate_dropdown = tk.OptionMenu(frame, baud_rate_var, 9600, 19200, 38400, 57600, 115200)
+        baud_rate_dropdown.grid(row=1, column=1, pady=5)
 
-        baud_rate_dropdown = tk.OptionMenu(communicatie_dialog, baud_rate_var, 9600, 19200, 38400, 57600, 115200)
-        baud_rate_dropdown.pack(padx=10, pady=5)
+        # Checkbox voor Modbus communicatie inschakelen
+        modbus_enable_var = tk.BooleanVar(communicatie_dialog)
+        modbus_enable_var.set(self.modbus_enable)  # Zet de huidige waarde voor Modbus aan/uit
+
+        modbus_enable_checkbox = tk.Checkbutton(frame, text="Modbus inschakelen", variable=modbus_enable_var)
+        modbus_enable_checkbox.grid(row=2, columnspan=2, pady=5)
 
         # Opslaan knop
         save_button = tk.Button(communicatie_dialog, text="Opslaan", command=save_settings)
         save_button.pack(padx=10, pady=20)
 
         communicatie_dialog.mainloop()
+

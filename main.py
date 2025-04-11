@@ -2,6 +2,7 @@
 import tkinter as tk
 from gui.object_manager import ObjectManager
 from gui.menu_manager import MenuManager
+from config import MODBUS_ENABLE
 
 
 class SCADAApp:
@@ -13,12 +14,28 @@ class SCADAApp:
         self.canvas = tk.Canvas(root, bg="orange")
         self.canvas.pack(fill="both", expand=True)
 
-        self.object_manager = ObjectManager(self.canvas)
+        self.current_name = "Nieuw"
 
-        def update_title(name):
-            self.root.title(f"SCADA Editor - {name}")
+        def set_name(name):
+            self.current_name = name
+            update_title()
 
-        self.menu = MenuManager.create_menu(root, self.canvas, self.object_manager, update_title)
+        def update_title():
+            status = ""
+            if self.object_manager.running:
+                status += " | Simulatie actief"
+            if self.object_manager.modbus_enable:
+                if self.object_manager.modbus and self.object_manager.modbus.client and self.object_manager.modbus.client.connected:
+                    status += " | Modbus OK"
+                else:
+                    status += " | Modbus geen verbinding"
+            else:
+                status += " | Modbus uitgeschakeld"
+
+            self.root.title(f"SCADA Editor - {self.current_name}{status}")
+
+        self.object_manager = ObjectManager(self.canvas, update_title)
+        self.menu = MenuManager.create_menu(root, self.canvas, self.object_manager, set_name)
 
 
 if __name__ == "__main__":
