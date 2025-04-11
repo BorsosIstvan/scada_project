@@ -1,7 +1,7 @@
 # SCADA app main.py
 import tkinter as tk
-from object_manager import ObjectManager
-from menu_manager import MenuManager
+from gui.object_manager import ObjectManager
+from gui.menu_manager import MenuManager
 
 
 class SCADAApp:

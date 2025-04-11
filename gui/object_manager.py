@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 import os
 import serial.tools.list_ports
 import tkinter as tk
-from modbus_simulator import ModbusSimulator
+from core.modbus_simulator import ModbusSimulator
 
 
 class ScadaObject:
