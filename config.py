@@ -27,4 +27,4 @@ MODBUS_CONFIG = {
     'parity': 'N',             # Pariteit
     'timeout': 1               # Timeout in seconden
 }
-MODBUS_ENABLE = True
+MODBUS_ENABLE_DEFAULT = True
