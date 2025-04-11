@@ -3,6 +3,7 @@ from tkinter import filedialog, Menu
 import json
 import os
 
+
 class MenuManager:
     @staticmethod
     def create_menu(root, canvas, object_manager, title_updater):
