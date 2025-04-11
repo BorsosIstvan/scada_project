@@ -281,7 +281,7 @@ class ObjectManager:
     def __init__(self, canvas):
         self.canvas = canvas
         self.objects = []
-        # definieer de communicatie variabelen
+        # definieer de communicatie
         self.com_port = COM_PORT
         self.baud_rate = BAUD_RATE
         self.modbus = ModbusSimulator(self.com_port)  # Zorg ervoor dat je de juiste poort kiest

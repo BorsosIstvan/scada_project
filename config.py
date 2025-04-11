@@ -9,3 +9,5 @@ COILS = [False] * 4
 DISCRETE_INPUTS = [False] * 1
 HOLDING_REGISTERS = [0] * 3
 INPUT_REGISTERS = [0] * 1
+
+# Canvas instellingen
