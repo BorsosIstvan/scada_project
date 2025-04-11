@@ -231,7 +231,7 @@ class ScadaObject:
             self.canvas.itemconfig(self.rect, fill="", outline="")
             self.image_path = self.image_path_state_1  # Laad de afbeelding voor state1
             self.load_images()
-        elif self.register_type =="HR" or self.register_type =="IR":
+        elif self.register_type == "HR" or self.register_type == "IR":
             self.canvas.itemconfig(self.rect, fill="", outline="")
             self.image_path = self.image_path_state_0  # Laad de afbeelding voor state0
             self.load_images()
@@ -274,21 +274,25 @@ class ScadaObject:
         print("Wil je het wisselen?", self.text)
 
 
+from config import COM_PORT, BAUD_RATE, COILS, DISCRETE_INPUTS, HOLDING_REGISTERS, INPUT_REGISTERS
+
+
 class ObjectManager:
     def __init__(self, canvas):
         self.canvas = canvas
         self.objects = []
-
-        self.com_port = None
-        self.baud_rate = 9600
-        self.modbus = ModbusSimulator('COM4')  # Zorg ervoor dat je de juiste poort kiest
+        # definieer de communicatie variabelen
+        self.com_port = COM_PORT
+        self.baud_rate = BAUD_RATE
+        self.modbus = ModbusSimulator(self.com_port)  # Zorg ervoor dat je de juiste poort kiest
         self.running = False
         self.thread = False
+        self.modbus_enable = False
         # definieer de Modbus registerstructuur
-        self.coils = [False] * 4  # Co (uitgangen)
-        self.discrete_inputs = [False] * 1  # DI (ingangen)
-        self.holding_registers = [0] * 3  # HR (uitgangen)
-        self.input_registers = [0] * 1  # IR (ingangen)
+        self.coils = COILS  # [False] * 4  # Co (uitgangen)
+        self.discrete_inputs = DISCRETE_INPUTS  # [False] * 1  # DI (ingangen)
+        self.holding_registers = HOLDING_REGISTERS  # [0] * 3  # HR (uitgangen)
+        self.input_registers = INPUT_REGISTERS  # [0] * 1  # IR (ingangen)
 
     def add_object(self, x, y):
         obj = ScadaObject(self.canvas, x, y)
