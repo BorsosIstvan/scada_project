@@ -1,0 +1,30 @@
+# Python standaard
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtuele omgevingen
+venv/
+env/
+
+# Build folders
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.spec
+
+# IDE bestanden
+.idea/
+.vscode/
+
+# Log- en temp-bestanden
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# OS-specifiek
+*.swp
