@@ -11,7 +11,7 @@ class ObjectManager:
         self.canvas = canvas
         self.objects = []
         self.update_title_callback = update_title_callback
-        # definieer de communicatie
+        # definieer de testenmaken
         self.com_port = COM_PORT
         self.baud_rate = BAUD_RATE
         self.modbus = ModbusSimulator(self.com_port, self.baud_rate)  # Zorg ervoor dat je de juiste poort kiest
